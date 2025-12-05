@@ -57,7 +57,7 @@ public:
   any(const any &other) {
     if (other.has_value()) {
       Arg arg;
-      arg.any = this;
+      arg.any_ptr = this;
       other.manager(Op::Clone, &other, &arg);
     } else {
       manager = nullptr;
@@ -72,7 +72,7 @@ public:
   any(any &&other) noexcept {
     if (other.has_value()) {
       Arg arg;
-      arg.any = this;
+      arg.any_ptr = this;
       other.manager(Op::Xfer, &other, &arg);
     } else {
       manager = nullptr;
@@ -204,19 +204,19 @@ public:
         return;
       any tmp;
       Arg arg;
-      arg.any = &tmp;
-      other.manager(Op::Xfer, &other, &arg); // Move other to tmp
+      arg.any_ptr = &tmp;
+      manager(Op::Xfer, this, &arg);
 
-      arg.any = &other;
-      manager(Op::Xfer, this, &arg); // Move this to other
+      arg.any_ptr = this;
+      other.manager(Op::Xfer, &other, &arg);
 
-      arg.any = this;
-      tmp.manager(Op::Xfer, &tmp, &arg); // Move tmp to this
+      arg.any_ptr = &other;
+      tmp.manager(Op::Xfer, &tmp, &arg);
     } else {
       any *empty = !has_value() ? this : &other;
       any *full = !has_value() ? &other : this;
       Arg arg;
-      arg.any = empty;
+      arg.any_ptr = empty;
       full->manager(Op::Xfer, full, &arg);
     }
   }
@@ -260,7 +260,7 @@ private:
   union Arg {
     void *obj;                      ///< Pointer to the contained object.
     const std::type_info *typeinfo; ///< Pointer to type_info.
-    any *any; ///< Pointer to another any object (for cloning/xfer).
+    any *any_ptr; ///< Pointer to another any object (for cloning/xfer).
   };
 
   static constexpr size_t BufferSize = 4 * sizeof(void *);
@@ -320,8 +320,8 @@ private:
       case Op::Clone:
         if constexpr (std::is_copy_constructible_v<T>) {
           const T &source_val = *static_cast<const T *>(Access(src->storage));
-          Create(arg->any->storage, source_val);
-          arg->any->manager = &Manage;
+          Create(arg->any_ptr->storage, source_val);
+          arg->any_ptr->manager = &Manage;
         } else {
           throw std::logic_error("nstd::any: Copying a move-only type");
         }
@@ -332,8 +332,8 @@ private:
       case Op::Xfer: {
         T &source_val =
             *static_cast<T *>(Access(const_cast<Storage &>(src->storage)));
-        Create(arg->any->storage, std::move(source_val));
-        arg->any->manager = &Manage;
+        Create(arg->any_ptr->storage, std::move(source_val));
+        arg->any_ptr->manager = &Manage;
         Destroy(const_cast<Storage &>(src->storage));
         const_cast<any *>(src)->manager = nullptr;
       } break;
