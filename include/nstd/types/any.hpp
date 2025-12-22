@@ -1,5 +1,4 @@
-#ifndef NSTD_DATA_ANY_HPP
-#define NSTD_DATA_ANY_HPP
+#pragma once
 
 #include <initializer_list>
 #include <new>
@@ -467,5 +466,3 @@ template <typename T> T any_cast(any &&operand) {
 }
 
 } // namespace nstd
-
-#endif // NSTD_DATA_ANY_HPP

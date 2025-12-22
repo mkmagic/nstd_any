@@ -2,7 +2,7 @@
 
 `nstd` is a C++ library designed to resemble and extend the standard library, providing robust implementations of useful components like `nstd::any` and efficient memory management utilities.
 
-## Chapter 1: Any
+## Types
 
 ### nstd::any
 
@@ -25,12 +25,12 @@ This design allows `nstd::any` to be used in a much wider range of scenarios whe
 - **Small Value Optimization (SVO)**: Avoids heap allocation for small types (up to `4 * sizeof(void*)`) that are nothrow move constructible.
 - **Standard API**: Drop-in replacement for `std::any` with a familiar API (`emplace`, `reset`, `has_value`, `type`, `any_cast`).
 - **Type Safety**: Throws `nstd::bad_any_cast` on invalid casts.
-- **Single Header**: Easy integration; just include `nstd/data/any.hpp`.
+- **Single Header**: Easy integration; just include `nstd/types/any.hpp`.
 
 #### Usage Example
 
 ```cpp
-#include "nstd/data/any.hpp"
+#include "nstd/types/any.hpp"
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -67,7 +67,7 @@ int main() {
 }
 ```
 
-## Chapter 2: Memory
+## Memory
 
 The `nstd::memory` namespace contains helpers to manage memory structures, including Smart Buffers and a Memory Pool.
 
