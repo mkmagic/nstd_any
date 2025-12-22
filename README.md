@@ -2,6 +2,22 @@
 
 `nstd` is a C++ library designed to resemble and extend the standard library, providing robust implementations of useful components like `nstd::any` and efficient memory management utilities.
 
+
+## Table of Contents
+- [Types](#types)
+  - [nstd::any](#nstdany)
+  - [nstd::singleton](#nstdsingleton)
+- [Memory](#memory)
+  - [Smart Buffers](#smart-buffers)
+    - [Released Buffer](#released-buffer)
+    - [Unique Buffer](#unique-buffer)
+    - [Shared Buffer](#shared-buffer)
+  - [Mempool](#mempool)
+- [Build Instructions](#build-instructions)
+- [Integrating into your project](#integrating-into-your-project)
+  - [Using Conan](#using-conan)
+  - [Manual Install](#manual-install)
+
 ## Types
 
 ### nstd::any
@@ -63,6 +79,48 @@ int main() {
         std::cout << "Extracted value: " << *extracted_ptr << "\n"; // Output: 100
     }
 
+    return 0;
+}
+```
+
+
+### nstd::singleton
+
+`nstd::singleton` is a CRTP (Curiously Recurring Template Pattern) base class that provides a thread-safe, lazy-initialized singleton implementation.
+
+#### Features
+
+- **Lazy Initialization**: The instance is created only when `getInstance` is called for the first time.
+- **Argument Forwarding**: Arguments passed to `getInstance` are forwarded to the constructor of the derived class.
+- **Thread Safety**: Uses C++11 static initialization guarantees for thread safety.
+
+#### Usage Example
+
+```cpp
+#include "nstd/types/Singleton.h"
+#include <iostream>
+
+class MyManager : public nstd::types::singleton<MyManager> {
+    friend class nstd::types::singleton<MyManager>; // Allow access to constructor
+
+    int config_value;
+
+    MyManager(int value) : config_value(value) {} // Private constructor
+
+public:
+    void doSomething() {
+        std::cout << "Doing something with config: " << config_value << "\n";
+    }
+};
+
+int main() {
+    // Initialize the singleton with arguments
+    auto instance = MyManager::getInstance(42);
+    instance->doSomething();
+
+    // Subsequent calls return the same instance
+    auto instance2 = MyManager::getInstance(99); // Arguments ignored
+    
     return 0;
 }
 ```
